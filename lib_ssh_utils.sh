@@ -1,3 +1,4 @@
+
 #!/bin/bash
 # lib_ssh_utils.sh (Updated)
 
@@ -12,17 +13,22 @@ ensure_authorized_keys() {
 }
 
 generate_ssh_key() {
+  local base_name="$1"
   ensure_authorized_keys
-  base_name="id_rsa"
-  keyname="$base_name"
-  i=1
+
+  local keyname="$base_name"
+  local i=1
+
   while [[ -e "$SSH_DIR/$keyname" || -e "$SSH_DIR/$keyname.pub" ]]; do
     keyname="${base_name}_$i"
     ((i++))
   done
-  keypath="$SSH_DIR/$keyname"
+
+  local keypath="$SSH_DIR/$keyname"
   ssh-keygen -t rsa -b 4096 -f "$keypath"
   ensure_authorized_keys
+
+  echo "✅ 생성된 키 이름: $keyname"
 }
 
 list_ssh_keys() {
@@ -43,8 +49,7 @@ delete_ssh_key() {
 
     echo "🔍 authorized_keys에서 해당 키 내용 제거 중..."
     if [[ -f "$SSH_DIR/authorized_keys" ]]; then
-      grep -vFx "$pubkey_content" "$SSH_DIR/authorized_keys" > "$SSH_DIR/authorized_keys.tmp" && \
-      mv "$SSH_DIR/authorized_keys.tmp" "$SSH_DIR/authorized_keys"
+      grep -vFx "$pubkey_content" "$SSH_DIR/authorized_keys" > "$SSH_DIR/authorized_keys.tmp" &&       mv "$SSH_DIR/authorized_keys.tmp" "$SSH_DIR/authorized_keys"
       echo "✔ authorized_keys에서 해당 키 제거 완료."
     fi
 
@@ -82,8 +87,7 @@ check_ssh_permissions() {
 backup_ssh_keys() {
   mkdir -p "$BACKUP_DIR"
   echo "🔒 SSH 키를 다음 위치에 백업합니다: $BACKUP_DIR"
-  tar -czf "$BACKUP_DIR/ssh_key_backup_$(date +%Y%m%d_%H%M%S).tar.gz" -C "$SSH_DIR" . && \
-    echo "백업 성공." || echo "백업 실패."
+  tar -czf "$BACKUP_DIR/ssh_key_backup_$(date +%Y%m%d_%H%M%S).tar.gz" -C "$SSH_DIR" . &&     echo "백업 성공." || echo "백업 실패."
 }
 
 restore_ssh_keys() {
